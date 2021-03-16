@@ -1,5 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 
 const app = express();
 
@@ -21,6 +22,7 @@ const PostSchema = mongoose.Schema({
 const PostModel = mongoose.model("post", PostSchema);
 
 // Middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -50,7 +52,7 @@ app.get("/api/posts/all", (req, res) => {
     });
 });
 
-app.post("/api/post/update", (req, res) => {
+app.put("/api/post/update", (req, res) => {
     let id = req.body._id;
     let payload = req.body;
     PostModel.findByIdAndUpdate(id, payload, (err, result) => {
@@ -60,7 +62,18 @@ app.post("/api/post/update", (req, res) => {
     });
 });
 
+app.delete("/api/post/delete", (req, res) => {
+    let id = req.body._id;
+
+    PostModel.findById(id).remove((err, result) => {
+            if (err) res.send({ success: false, msg: err });
+    
+            res.send({ success: true, result: result });
+    });
+});
+
 app.listen(process.env.PORT || 3000, err => {
+
     if (err) console.error(err);
     console.log("Server has started on port %s", process.env.PORT || 3000);
 });
